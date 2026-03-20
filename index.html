@@ -1,96 +1,255 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Tik-Tac-Toe Gate</title>
+  <meta charset="UTF-8">
+  <title>Can you claim my treasure?</title>
   <style>
+    body {
+      background-color: #121212; /* Dark mode */
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: monospace;
+      text-align: center;
+    }
+    .container { text-align: center; }
+    .input-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    input {
+      padding: 8px;
+      background-color: #1e1e1e;
+      border: 1px solid #ffffff;
+      color: #ffffff;
+    }
+    button {
+      padding: 8px 12px;
+      background-color: #ffffff;
+      border: none;
+      color: #121212;
+      cursor: pointer;
+    }
+    #output {
+      margin-top: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #00ff00;
+    }
+    #mathSection { display: none; margin-top: 20px; }
+    #passwordSection { display: none; margin-top: 20px; }
+    #idSection { margin-top: 20px; }
+    #countdown {
+      font-size: 20px;
+      margin-top: 20px;
+      color: #00ff00;
+    }
+    #message {
+      font-size: 28px;
+      font-weight: bold;
+      color: #ff4444;
+      margin-top: 20px;
+    }
+    #lockout {
+      font-size: 18px;
+      color: #ffcc00;
+      margin-top: 10px;
+    }
+    #riddle {
+      margin-top: 20px;
+      font-style: italic;
+      color: #00ffff;
+    }
+    /* Tik-Tac-Toe styles */
     #board {
       display: grid;
-      grid-template-columns: repeat(3, 100px);
+      grid-template-columns: repeat(3, 80px);
       grid-gap: 5px;
       margin: 20px auto;
     }
     .cell {
-      width: 100px;
-      height: 100px;
+      width: 80px;
+      height: 80px;
       font-size: 2em;
       text-align: center;
-      line-height: 100px;
-      background: #eee;
+      line-height: 80px;
+      background: #1e1e1e;
+      border: 1px solid #ffffff;
       cursor: pointer;
     }
-    #mathGate {
-      display: none;
-      margin-top: 20px;
-      text-align: center;
-    }
+    #tictactoeSection { display:none; margin-top:20px; }
   </style>
 </head>
 <body>
-  <h2 style="text-align:center;">Win or Draw to Unlock the Math Gate</h2>
-  <div id="board"></div>
-  <div id="mathGate">
-    <h3>✅ Math Gate Unlocked!</h3>
-    <p>Solve: What is (7 × 8) + 12?</p>
-    <!-- Add your math logic here -->
+  <div class="container">
+    <div id="riddle">
+      I am why you can move in your phone.<br>
+      I have 16 brothers.<br>
+      Find the thing that is related to me and my brothers.
+    </div>
+
+    <div id="idSection">
+      <h2>Enter Your ID</h2>
+      <div class="input-row">
+        <input type="text" id="idInput" placeholder="ID">
+        <button onclick="checkID()">Submit</button>
+      </div>
+    </div>
+
+    <div id="passwordSection">
+      <h2>Enter Password</h2>
+      <div class="input-row">
+        <input type="password" id="passwordInput" placeholder="Password">
+        <button onclick="checkPassword()">Submit</button>
+      </div>
+      <div id="lockout"></div>
+    </div>
+
+    <div id="tictactoeSection">
+      <h2>Beat me in Tik‑Tac‑Toe to continue</h2>
+      <div id="board"></div>
+    </div>
+
+    <div id="mathSection">
+      <h2>Thought it was over??</h2>
+      <p>What is the largest prime factor of the product of all integers<br>
+         from 1 to 100 that can be written in the form n² + 1 for some integer n?</p>
+      <div class="input-row">
+        <input type="text" id="answerInput" placeholder="Your Answer">
+        <button onclick="checkAnswer()">Submit</button>
+      </div>
+    </div>
+
+    <div id="output"></div>
+    <div id="countdown"></div>
+    <div id="message"></div>
   </div>
 
   <script>
-    const board = document.getElementById("board");
-    const mathGate = document.getElementById("mathGate");
-    let cells = Array(9).fill("");
-    let player = "X";
-    let gameOver = false;
+    let wrongAttempts = 0;
+    let lockoutActive = false;
 
-    function checkWin(c) {
-      const wins = [
-        [0,1,2],[3,4,5],[6,7,8],
-        [0,3,6],[1,4,7],[2,5,8],
-        [0,4,8],[2,4,6]
-      ];
-      return wins.some(line => line.every(i => cells[i] === c));
-    }
-
-    function checkDraw() {
-      return cells.every(c => c !== "");
-    }
-
-    function aiMove() {
-      let empty = cells.map((c, i) => c === "" ? i : null).filter(i => i !== null);
-      if (empty.length === 0) return;
-      let move = empty[Math.floor(Math.random() * empty.length)];
-      cells[move] = "O";
-      board.children[move].textContent = "O";
-    }
-
-    function handleClick(i) {
-      if (cells[i] !== "" || gameOver) return;
-      cells[i] = player;
-      board.children[i].textContent = player;
-
-      if (checkWin(player)) {
-        gameOver = true;
-        mathGate.style.display = "block";
-      } else if (checkDraw()) {
-        gameOver = true;
-        mathGate.style.display = "block";
+    function checkID() {
+      const id = document.getElementById("idInput").value.trim();
+      if (id === "2018" || id === "2567") {
+        document.getElementById("idSection").style.display = "none";
+        document.getElementById("passwordSection").style.display = "block";
       } else {
-        aiMove();
-        if (checkWin("O")) {
-          gameOver = true;
-          alert("❌ You lost. Try again.");
-        } else if (checkDraw()) {
-          gameOver = true;
-          mathGate.style.display = "block";
+        const output = document.getElementById("output");
+        output.textContent = "Invalid ID";
+        setTimeout(() => { output.textContent = ""; }, 2000);
+      }
+    }
+
+    function checkPassword() {
+      if (lockoutActive) return;
+
+      const input = document.getElementById("passwordInput").value;
+      if (input === "Bravys gives you another chance") {
+        wrongAttempts = 0;
+        startTicTacToe(); // show tic tac toe instead of math directly
+      } else {
+        wrongAttempts++;
+        const output = document.getElementById("output");
+        output.textContent = "Access Denied";
+        setTimeout(() => { output.textContent = ""; }, 2000);
+
+        if (wrongAttempts >= 5) {
+          startLockout();
         }
       }
     }
 
-    for (let i = 0; i < 9; i++) {
-      let cell = document.createElement("div");
-      cell.className = "cell";
-      cell.addEventListener("click", () => handleClick(i));
-      board.appendChild(cell);
+    function startLockout() {
+      lockoutActive = true;
+      let timeLeft = 30;
+      const lockoutEl = document.getElementById("lockout");
+      lockoutEl.textContent = `Too many attempts! Wait ${timeLeft}s`;
+
+      const interval = setInterval(() => {
+        timeLeft--;
+        lockoutEl.textContent = `Too many attempts! Wait ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+          lockoutEl.textContent = "";
+          lockoutActive = false;
+          wrongAttempts = 0;
+        }
+      }, 1000);
     }
-  </script>
-</body>
-</html>
+
+    function startTicTacToe() {
+      document.getElementById("passwordSection").style.display = "none";
+      document.getElementById("tictactoeSection").style.display = "block";
+
+      const board = document.getElementById("board");
+      board.innerHTML = "";
+      let cells = Array(9).fill("");
+      let gameOver = false;
+
+      function checkWin(c) {
+        const wins = [
+          [0,1,2],[3,4,5],[6,7,8],
+          [0,3,6],[1,4,7],[2,5,8],
+          [0,4,8],[2,4,6]
+        ];
+        return wins.some(line => line.every(i => cells[i] === c));
+      }
+
+      function checkDraw() {
+        return cells.every(c => c !== "");
+      }
+
+      function aiMove() {
+        let empty = cells.map((c, i) => c === "" ? i : null).filter(i => i !== null);
+        if (empty.length === 0) return;
+        let move = empty[Math.floor(Math.random() * empty.length)];
+        cells[move] = "O";
+        board.children[move].textContent = "O";
+      }
+
+      function handleClick(i) {
+        if (cells[i] !== "" || gameOver) return;
+        cells[i] = "X";
+        board.children[i].textContent = "X";
+
+        if (checkWin("X") || checkDraw()) {
+          gameOver = true;
+          document.getElementById("tictactoeSection").style.display = "none";
+          document.getElementById("mathSection").style.display = "block";
+        } else {
+          aiMove();
+          if (checkWin("O")) {
+            gameOver = true;
+            alert("❌ You lost. Try again.");
+            startTicTacToe(); // restart
+          } else if (checkDraw()) {
+            gameOver = true;
+            document.getElementById("tictactoeSection").style.display = "none";
+            document.getElementById("mathSection").style.display = "block";
+          }
+        }
+      }
+
+      for (let i = 0; i < 9; i++) {
+        let cell = document.createElement("div");
+        cell.className = "cell";
+        cell.addEventListener("click", () => handleClick(i));
+        board.appendChild(cell);
+      }
+    }
+
+    function checkAnswer() {
+      const input = document.getElementById("answerInput").value.trim();
+      const output = document.getElementById("output");
+      if (input === "97") {
+        output.textContent = "19067";
+        setTimeout(() => { output.textContent = ""; }, 2000);
+      } else {
+        output.textContent = "Wrong Answer";
+        setTimeout(() => { output.textContent = ""; }, 2000);
+      }
